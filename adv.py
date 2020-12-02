@@ -45,6 +45,60 @@ class Stack():
     def size(self):
         return len(self.stack)
 
+def travelers_path(direction):
+    # save our route back to unvisited exits
+    if direction == 'n':
+        return 's'
+    elif direction == 's':
+        return 'n'
+    elif direction == 'e':
+        return 'w'
+    elif direction == 'w':
+        return 'e'
+
+graph = {}
+
+
+def explore(came_from=None):
+    to_visit = Stack()
+
+    if player.current_room.id not in graph:
+        graph[player.current_room.id] = {}
+
+    if came_from is not None:
+        graph[player.current_room.id][travelers_path(
+            came_from)] = player.current_room.get_room_in_direction(travelers_path(came_from)).id
+
+    for direction in player.current_room.get_exits():
+        if direction not in graph[player.current_room.id]:
+            graph[player.current_room.id][direction] = '?'
+
+    for direction in player.current_room.get_exits():
+        adj_room = player.current_room.get_room_in_direction(direction).id
+
+        if adj_room not in graph or graph[player.current_room.id][direction] == '?':
+            to_visit.push(direction)
+
+    while to_visit.size() > 0:
+
+        go_to = to_visit.pop()
+
+        if player.current_room.get_room_in_direction(go_to).id not in graph:
+            traversal_path.append(go_to)
+            graph[player.current_room.id][go_to] = player.current_room.get_room_in_direction(
+                go_to).id
+            player.travel(go_to)
+            explore(go_to)
+
+            if len(graph) == len(world.rooms):
+                return
+
+            traversal_path.append(travelers_path(go_to))
+            player.travel(travelers_path(go_to))
+
+
+print(explore())
+
 # TRAVERSAL TEST - DO NOT MODIFY
 visited_rooms = set()
 player.current_room = world.starting_room
